@@ -9,7 +9,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  ReferenceLine,
 } from 'recharts';
 import { TrendingUp, Calendar } from 'lucide-react';
 import axios from 'axios';
@@ -45,7 +44,6 @@ const Forecasting = () => {
       axios
         .get(`http://localhost:8000/forecast/${currentProductId}`)
         .then(res => {
-          // Transform forecast data
           const data = res.data.forecast_data.map((item, idx) => {
             const date = new Date();
             date.setDate(date.getDate() + idx);
@@ -78,15 +76,15 @@ const Forecasting = () => {
   const accuracy = forecastData?.model_accuracy || 0;
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Product Selector */}
+    <div className="space-y-6">
+      {/* Product Selector & Accuracy */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="md:col-span-2 bg-supply-card rounded-lg p-4 border border-gray-700">
-          <label className="block text-gray-400 text-sm mb-2">Select Product</label>
+        <div className="md:col-span-2 card-modern">
+          <label className="block text-slate-700 text-sm font-semibold mb-3">📦 Select Product for Forecast</label>
           <select
             value={currentProductId || ''}
             onChange={(e) => setSelectedProductId(parseInt(e.target.value))}
-            className="w-full bg-supply-bg border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-supply-accent"
+            className="input-modern w-full"
           >
             {products.map(product => (
               <option key={product.id} value={product.id}>
@@ -97,103 +95,115 @@ const Forecasting = () => {
         </div>
 
         {/* Accuracy Card */}
-        <div className="bg-supply-card rounded-lg p-4 border border-gray-700">
-          <p className="text-gray-400 text-sm">Forecast Accuracy</p>
-          <div className="flex items-end gap-2 mt-2">
-            <h3 className="text-supply-success font-bold text-3xl">{accuracy.toFixed(1)}%</h3>
-            <TrendingUp className="w-5 h-5 text-supply-success" />
+        <div className="card-modern bg-gradient-to-br from-success-50 to-success-100 border border-success-200">
+          <p className="text-success-600 text-sm font-semibold mb-2 uppercase">Model Accuracy</p>
+          <div className="flex items-end gap-2">
+            <h3 className="text-success-900 font-bold text-3xl">{accuracy.toFixed(1)}%</h3>
+            <TrendingUp className="w-5 h-5 text-success-600" />
           </div>
         </div>
       </div>
 
       {/* Main Forecast Chart */}
       {chartData.length > 0 && !loadingForecast && (
-        <div className="bg-supply-card rounded-lg p-6 shadow-lg border border-gray-700">
-          <h2 className="text-white font-bold mb-4 text-lg">
-            30-Day Demand Forecast
-          </h2>
-          <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis
-                dataKey="date"
-                stroke="#94a3b8"
-                angle={-45}
-                textAnchor="end"
-                height={80}
-              />
-              <YAxis stroke="#94a3b8" />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #3b82f6' }}
-                labelStyle={{ color: '#e2e8f0' }}
-              />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="historical"
-                stroke="#3b82f6"
-                name="Historical Demand"
-                dot={{ r: 2 }}
-                strokeWidth={2}
-              />
-              <Line
-                type="monotone"
-                dataKey="forecast"
-                stroke="#22c55e"
-                strokeDasharray="5 5"
-                name="Forecast"
-                dot={{ r: 2 }}
-                strokeWidth={2}
-              />
-              <Line
-                type="monotone"
-                dataKey="confidence_upper"
-                stroke="#94a3b8"
-                strokeDasharray="2 2"
-                name="Confidence Range"
-                dot={false}
-                strokeWidth={1}
-              />
-              <Line
-                type="monotone"
-                dataKey="confidence_lower"
-                stroke="#94a3b8"
-                strokeDasharray="2 2"
-                dot={false}
-                strokeWidth={1}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+        <div className="card-modern">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center text-lg">
+              🔮
+            </div>
+            <h2 className="gradient-text-primary text-xl font-bold">30-Day Demand Forecast</h2>
+          </div>
+
+          <div className="overflow-x-auto">
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis
+                  dataKey="date"
+                  stroke="#64748b"
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                />
+                <YAxis stroke="#64748b" />
+                <Tooltip
+                  contentStyle={{ 
+                    backgroundColor: '#ffffff', 
+                    border: '1px solid #e2e8f0', 
+                    borderRadius: '0.75rem',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+                  }}
+                  labelStyle={{ color: '#1e293b' }}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="historical"
+                  stroke="#0284c7"
+                  name="Historical"
+                  dot={{ r: 2 }}
+                  strokeWidth={2}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="forecast"
+                  stroke="#22c55e"
+                  strokeDasharray="5 5"
+                  name="Forecast"
+                  dot={{ r: 2 }}
+                  strokeWidth={2}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="confidence_upper"
+                  stroke="#cbd5e1"
+                  strokeDasharray="2 2"
+                  name="Confidence Range"
+                  dot={false}
+                  strokeWidth={1}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="confidence_lower"
+                  stroke="#cbd5e1"
+                  strokeDasharray="2 2"
+                  dot={false}
+                  strokeWidth={1}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       )}
 
       {loadingForecast && (
-        <div className="bg-supply-card rounded-lg p-8 shadow-lg border border-gray-700 text-center">
-          <p className="text-gray-400">Loading forecast data...</p>
+        <div className="card-modern flex flex-col items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mb-4"></div>
+          <p className="text-slate-600 font-medium">Loading forecast data...</p>
         </div>
       )}
 
       {/* Stats Grid */}
       {forecastData && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-supply-card rounded-lg p-4 border border-gray-700">
-            <p className="text-gray-400 text-sm">Model Accuracy</p>
-            <h3 className="text-white font-bold text-2xl mt-1">{accuracy.toFixed(1)}%</h3>
+          <div className="card-modern bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200">
+            <p className="text-primary-600 text-sm font-semibold mb-2 uppercase">🎯 Accuracy</p>
+            <h3 className="text-primary-900 font-bold text-2xl">{accuracy.toFixed(1)}%</h3>
           </div>
-          <div className="bg-supply-card rounded-lg p-4 border border-gray-700">
-            <p className="text-gray-400 text-sm">Forecast Period</p>
-            <h3 className="text-white font-bold text-2xl mt-1">30 Days</h3>
+          <div className="card-modern bg-gradient-to-br from-accent-50 to-accent-100 border border-accent-200">
+            <p className="text-accent-600 text-sm font-semibold mb-2 uppercase">📅 Period</p>
+            <h3 className="text-accent-900 font-bold text-2xl">30 Days</h3>
           </div>
-          <div className="bg-supply-card rounded-lg p-4 border border-gray-700">
-            <p className="text-gray-400 text-sm">Avg Predicted Demand</p>
-            <h3 className="text-white font-bold text-2xl mt-1">
+          <div className="card-modern bg-gradient-to-br from-warning-50 to-warning-100 border border-warning-200">
+            <p className="text-warning-600 text-sm font-semibold mb-2 uppercase">📊 Avg Demand</p>
+            <h3 className="text-warning-900 font-bold text-2xl">
               {Math.round(chartData.reduce((sum, d) => sum + d.forecast, 0) / chartData.length) || 0}
             </h3>
           </div>
-          <div className="bg-supply-card rounded-lg p-4 border border-gray-700">
-            <p className="text-gray-400 text-sm">30-Day Total</p>
-            <h3 className="text-supply-success font-bold text-2xl mt-1">
-              {Math.round(chartData.reduce((sum, d) => sum + d.forecast, 0)) || 0} units
+          <div className="card-modern bg-gradient-to-br from-success-50 to-success-100 border border-success-200">
+            <p className="text-success-600 text-sm font-semibold mb-2 uppercase">📈 Total</p>
+            <h3 className="text-success-900 font-bold text-2xl">
+              {Math.round(chartData.reduce((sum, d) => sum + d.forecast, 0)) || 0}
             </h3>
           </div>
         </div>
@@ -201,39 +211,43 @@ const Forecasting = () => {
 
       {/* Insights */}
       {forecastData && (
-        <div className="bg-supply-card rounded-lg p-6 shadow-lg border border-gray-700">
-          <h3 className="text-white font-bold text-lg mb-4 flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
-            Forecast Insights
-          </h3>
+        <div className="card-modern">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-lg bg-accent-100 flex items-center justify-center text-lg">
+              💡
+            </div>
+            <h2 className="gradient-text-primary text-xl font-bold">Forecast Insights</h2>
+          </div>
+
           <div className="space-y-3">
-            <div className="flex gap-3 p-3 bg-supply-bg rounded border border-gray-600">
-              <div className="text-supply-accent mt-1">•</div>
-              <p className="text-gray-300">Model accuracy: {accuracy.toFixed(1)}% based on historical data</p>
+            <div className="flex gap-4 p-4 bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200 rounded-lg hover:shadow-md transition-shadow">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center font-semibold text-sm">1</div>
+              <p className="text-primary-900 text-sm">Model accuracy: <span className="font-semibold">{accuracy.toFixed(1)}%</span> based on historical data</p>
             </div>
-            <div className="flex gap-3 p-3 bg-supply-bg rounded border border-gray-600">
-              <div className="text-supply-accent mt-1">•</div>
-              <p className="text-gray-300">
-                Total 30-day forecast: {Math.round(chartData.reduce((sum, d) => sum + d.forecast, 0)) || 0} units
+            <div className="flex gap-4 p-4 bg-gradient-to-br from-accent-50 to-accent-100 border border-accent-200 rounded-lg hover:shadow-md transition-shadow">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent-600 text-white flex items-center justify-center font-semibold text-sm">2</div>
+              <p className="text-accent-900 text-sm">
+                Total 30-day forecast: <span className="font-semibold">{Math.round(chartData.reduce((sum, d) => sum + d.forecast, 0)) || 0} units</span>
               </p>
             </div>
-            <div className="flex gap-3 p-3 bg-supply-bg rounded border border-gray-600">
-              <div className="text-supply-accent mt-1">•</div>
-              <p className="text-gray-300">
-                Average daily demand: {Math.round(chartData.reduce((sum, d) => sum + d.forecast, 0) / chartData.length) || 0} units
+            <div className="flex gap-4 p-4 bg-gradient-to-br from-warning-50 to-warning-100 border border-warning-200 rounded-lg hover:shadow-md transition-shadow">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-warning-600 text-white flex items-center justify-center font-semibold text-sm">3</div>
+              <p className="text-warning-900 text-sm">
+                Average daily demand: <span className="font-semibold">{Math.round(chartData.reduce((sum, d) => sum + d.forecast, 0) / chartData.length) || 0} units</span>
               </p>
             </div>
-            <div className="flex gap-3 p-3 bg-supply-bg rounded border border-gray-600">
-              <div className="text-supply-accent mt-1">•</div>
-              <p className="text-gray-300">Confidence interval shows ±15% prediction range</p>
+            <div className="flex gap-4 p-4 bg-gradient-to-br from-success-50 to-success-100 border border-success-200 rounded-lg hover:shadow-md transition-shadow">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-success-600 text-white flex items-center justify-center font-semibold text-sm">4</div>
+              <p className="text-success-900 text-sm">Confidence interval shows ±15% prediction range</p>
             </div>
           </div>
         </div>
       )}
 
       {!products.length && (
-        <div className="bg-supply-card rounded-lg p-8 shadow-lg border border-gray-700 text-center">
-          <p className="text-gray-400">No products available for forecasting</p>
+        <div className="card-modern py-12 text-center">
+          <Calendar className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+          <p className="text-slate-500 font-medium">No products available for forecasting</p>
         </div>
       )}
     </div>

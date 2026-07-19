@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Activity,
+  Zap,
 } from 'lucide-react';
 import Overview from './components/Overview';
 import Inventory from './components/Inventory';
@@ -21,7 +22,6 @@ function App() {
   const [isLive, setIsLive] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
-  // Simulate live indicator pulse
   useEffect(() => {
     const interval = setInterval(() => {
       setLastUpdated(new Date());
@@ -40,26 +40,29 @@ function App() {
   const currentComponent = pages[currentPage].component;
 
   return (
-    <div className="flex h-screen bg-supply-bg">
+    <div className="flex h-screen bg-gradient-bright">
       {/* Sidebar */}
       <div
         className={`${
           sidebarOpen ? 'w-64' : 'w-20'
-        } bg-supply-card border-r border-gray-700 transition-all duration-300 flex flex-col`}
+        } bg-white border-r border-slate-200 transition-all duration-300 flex flex-col shadow-md`}
       >
         {/* Logo */}
-        <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
           {sidebarOpen && (
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-supply-accent rounded flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-white" />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-600 rounded-xl flex items-center justify-center shadow-md shadow-primary-500/30">
+                <Zap className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-white font-bold text-lg">SupplySense</h1>
+              <div>
+                <h1 className="gradient-text-primary text-lg font-bold">SupplySense</h1>
+                <p className="text-xs text-slate-500">Smart Supply Chain</p>
+              </div>
             </div>
           )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-slate-400 hover:text-slate-600 transition-colors p-2 hover:bg-slate-100 rounded-lg"
           >
             {sidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
           </button>
@@ -70,18 +73,35 @@ function App() {
           {Object.entries(pages).map(([key, page]) => {
             const Icon = page.icon;
             const isActive = currentPage === key;
+            
+            const emojiMap = {
+              overview: '📊',
+              inventory: '📦',
+              suppliers: '🚚',
+              forecasting: '📈',
+              ask: '🤖',
+            };
+            
+            const colorMap = {
+              overview: 'from-primary-500 to-primary-600',
+              inventory: 'from-warning-500 to-warning-600',
+              suppliers: 'from-accent-500 to-accent-600',
+              forecasting: 'from-success-500 to-success-600',
+              ask: 'from-accent-600 to-primary-600',
+            };
+            
             return (
               <button
                 key={key}
                 onClick={() => setCurrentPage(key)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                   isActive
-                    ? 'bg-supply-accent text-white'
-                    : 'text-gray-400 hover:text-white hover:bg-supply-bg'
+                    ? `bg-gradient-to-r ${colorMap[key]} text-white shadow-lg shadow-slate-300/50`
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
                 title={!sidebarOpen ? page.label : ''}
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
+                <span className="text-lg flex-shrink-0">{emojiMap[key]}</span>
                 {sidebarOpen && <span className="text-sm font-medium">{page.label}</span>}
               </button>
             );
@@ -89,14 +109,14 @@ function App() {
         </nav>
 
         {/* Live Indicator */}
-        <div className="p-4 border-t border-gray-700">
-          <div className="flex items-center gap-2 text-xs">
-            <div className="w-2 h-2 bg-supply-success rounded-full animate-pulse"></div>
+        <div className="p-4 border-t border-slate-100">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-success-500 rounded-full animate-pulse shadow-md shadow-success-500/50"></div>
             {sidebarOpen && (
-              <div>
-                <p className="text-gray-300 font-semibold">Live</p>
-                <p className="text-gray-500 text-xs">
-                  Updated {lastUpdated.toLocaleTimeString()}
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-slate-700">Live Data</p>
+                <p className="text-xs text-slate-500">
+                  {lastUpdated.toLocaleTimeString()}
                 </p>
               </div>
             )}
@@ -107,29 +127,30 @@ function App() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <div className="bg-supply-card border-b border-gray-700 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-white font-bold text-xl">{pages[currentPage].label}</h2>
-          <div className="flex items-center gap-4">
+        <div className="bg-white border-b border-slate-100 px-8 py-4 flex items-center justify-between shadow-sm">
+          <div>
+            <h2 className="gradient-text-primary text-2xl font-bold">{pages[currentPage].label}</h2>
+            <p className="text-sm text-slate-500 mt-1">Welcome back! Here's what's happening today.</p>
+          </div>
+          <div className="flex items-center gap-6">
             {/* Last Updated */}
             <div className="flex items-center gap-2 text-sm">
-              <Activity className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-400">
+              <Activity className="w-4 h-4 text-primary-500" />
+              <span className="text-slate-600">
                 Updated: {lastUpdated.toLocaleTimeString()}
               </span>
             </div>
 
             {/* Live Indicator */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 px-3 py-1 bg-green-900/20 rounded-full">
-                <div className="w-2 h-2 bg-supply-success rounded-full animate-pulse"></div>
-                <span className="text-supply-success text-xs font-semibold">Live</span>
-              </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-gradient-glow-success rounded-lg border border-success-200">
+              <div className="w-2 h-2 bg-success-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-semibold text-success-700">Live</span>
             </div>
           </div>
         </div>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto p-8">
           {React.createElement(currentComponent)}
         </div>
       </div>

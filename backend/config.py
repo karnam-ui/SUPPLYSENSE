@@ -5,7 +5,7 @@ from typing import Optional
 # Database configuration
 DATABASE_URL: str = os.getenv(
     "DATABASE_URL",
-    "postgresql://suhaas@localhost/supplysense"
+    "postgresql://sainishanth@localhost/supplysense"
 )
 
 # Redis configuration
@@ -18,7 +18,7 @@ SERVER_HOST: str = "0.0.0.0"
 
 # Ollama configuration
 OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL: str = "llama3.2"
+OLLAMA_MODEL: str = "llama3"
 
 # Background task configuration
 BACKGROUND_TASK_INTERVAL: int = 10  # seconds

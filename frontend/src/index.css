@@ -8,26 +8,329 @@
   box-sizing: border-box;
 }
 
-body {
-  background-color: #0f172a;
-  color: #e2e8f0;
-  font-family: system-ui, -apple-system, sans-serif;
+html {
+  scroll-behavior: smooth;
 }
 
+/* Modern Bright Background */
+body {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f0f9ff 50%, #f5f3ff 75%, #f0fdf4 100%);
+  background-attachment: fixed;
+  background-size: 200% 200%;
+  color: #1e293b;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #f1f5f9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3b82f6;
+  background: linear-gradient(180deg, #0ea5e9 0%, #8b5cf6 100%);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2563eb;
+  background: linear-gradient(180deg, #0284c7 0%, #7c3aed 100%);
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  color: #0c2d5e;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+h1 {
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 24px;
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: 20px;
+  line-height: 1.4;
+}
+
+/* Links */
+a {
+  color: #0284c7;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+a:hover {
+  color: #7c3aed;
+}
+
+/* Utility Classes */
+.gradient-text-primary {
+  background: linear-gradient(135deg, #0284c7 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+.gradient-text-success {
+  background: linear-gradient(135deg, #16a34a 0%, #0284c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glass-effect {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-effect-dark {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.card-modern {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(226,232,240,0.8);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-modern:hover {
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
+  border-color: rgba(14,165,233,0.3);
+}
+
+.card-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at top right, rgba(14,165,233,0.1), transparent);
+  pointer-events: none;
+}
+
+/* Status Indicators */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 200ms ease;
+}
+
+.status-success {
+  background: rgba(34,197,94,0.1);
+  color: #15803d;
+  border: 1px solid rgba(34,197,94,0.3);
+}
+
+.status-success:hover {
+  background: rgba(34,197,94,0.15);
+  box-shadow: 0 0 12px rgba(34,197,94,0.2);
+}
+
+.status-warning {
+  background: rgba(245,158,11,0.1);
+  color: #b45309;
+  border: 1px solid rgba(245,158,11,0.3);
+}
+
+.status-warning:hover {
+  background: rgba(245,158,11,0.15);
+  box-shadow: 0 0 12px rgba(245,158,11,0.2);
+}
+
+.status-danger {
+  background: rgba(239,68,68,0.1);
+  color: #991b1b;
+  border: 1px solid rgba(239,68,68,0.3);
+}
+
+.status-danger:hover {
+  background: rgba(239,68,68,0.15);
+  box-shadow: 0 0 12px rgba(239,68,68,0.2);
+}
+
+.status-info {
+  background: rgba(14,165,233,0.1);
+  color: #075985;
+  border: 1px solid rgba(14,165,233,0.3);
+}
+
+.status-info:hover {
+  background: rgba(14,165,233,0.15);
+  box-shadow: 0 0 12px rgba(14,165,233,0.2);
+}
+
+/* Animated Status Dot */
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.status-dot.success {
+  background-color: #22c55e;
+}
+
+.status-dot.warning {
+  background-color: #f59e0b;
+}
+
+.status-dot.danger {
+  background-color: #ef4444;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Modern Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #0284c7 0%, #8b5cf6 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 200ms ease;
+  box-shadow: 0 4px 12px rgba(14,165,233,0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(14,165,233,0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: rgba(226,232,240,0.5);
+  color: #0c2d5e;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(226,232,240,0.8);
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(226,232,240,0.7);
+  border-color: #0284c7;
+}
+
+/* Input Fields */
+.input-modern {
+  width: 100%;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.8);
+  border: 1px solid rgba(226,232,240,0.8);
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1e293b;
+  transition: all 200ms ease;
+}
+
+.input-modern:focus {
+  outline: none;
+  background: rgba(255,255,255,0.95);
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(14,165,233,0.1);
+}
+
+.input-modern::placeholder {
+  color: #94a3b8;
+}
+
+/* Animations */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }

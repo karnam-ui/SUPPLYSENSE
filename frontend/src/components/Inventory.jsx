@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import useAPI from '../hooks/useAPI';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Search, AlertCircle } from 'lucide-react';
+import { Search, Package } from 'lucide-react';
 
 const Inventory = () => {
   const { data: inventoryData } = useAPI('/inventory');
@@ -14,7 +14,6 @@ const Inventory = () => {
     );
   }, [inventoryData, searchTerm]);
 
-  // Prepare chart data for top products
   const chartData = useMemo(() => {
     if (!Array.isArray(inventoryData)) return [];
     return inventoryData.slice(0, 8).map(p => ({
@@ -25,60 +24,86 @@ const Inventory = () => {
   }, [inventoryData]);
 
   const getStockStatus = (current, reorder) => {
-    if (current <= reorder) return { color: 'text-supply-critical', bg: 'bg-red-900/20', status: 'Critical' };
-    if (current <= reorder * 1.5) return { color: 'text-supply-warning', bg: 'bg-yellow-900/20', status: 'Low' };
-    return { color: 'text-supply-success', bg: 'bg-green-900/20', status: 'OK' };
+    if (current <= reorder) return { color: 'danger', status: 'Critical', emoji: '❌' };
+    if (current <= reorder * 1.5) return { color: 'warning', status: 'Low', emoji: '⚠️' };
+    return { color: 'success', status: 'OK', emoji: '✅' };
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Search Bar */}
-      <div className="bg-supply-card rounded-lg p-4 border border-gray-700">
-        <div className="flex items-center gap-2">
-          <Search className="text-gray-400 w-5 h-5" />
+      <div className="card-modern">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center text-lg">
+            🔍
+          </div>
+          <h2 className="gradient-text-primary text-xl font-bold">Search Inventory</h2>
+        </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input
             type="text"
             placeholder="Search by product name or SKU..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 bg-supply-bg border border-gray-600 rounded px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-supply-accent"
+            className="input-modern pl-10 w-full"
           />
         </div>
       </div>
 
       {/* Chart */}
       {chartData.length > 0 && (
-        <div className="bg-supply-card rounded-lg p-6 shadow-lg border border-gray-700">
-          <h2 className="text-white font-bold mb-4 text-lg">Stock Levels Overview</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="name" stroke="#94a3b8" />
-              <YAxis stroke="#94a3b8" />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #3b82f6' }}
-                labelStyle={{ color: '#e2e8f0' }}
-              />
-              <Legend />
-              <Bar dataKey="current" fill="#3b82f6" radius={[8, 8, 0, 0]} />
-              <Bar dataKey="reorder" fill="#f59e0b" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="card-modern">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-lg bg-success-100 flex items-center justify-center text-lg">
+              📊
+            </div>
+            <h2 className="gradient-text-primary text-xl font-bold">Stock Levels Overview</h2>
+          </div>
+
+          <div className="overflow-x-auto">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="name" stroke="#64748b" />
+                <YAxis stroke="#64748b" />
+                <Tooltip
+                  contentStyle={{ 
+                    backgroundColor: '#ffffff', 
+                    border: '1px solid #e2e8f0', 
+                    borderRadius: '0.75rem',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+                  }}
+                  labelStyle={{ color: '#1e293b' }}
+                />
+                <Legend />
+                <Bar dataKey="current" fill="#0284c7" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="reorder" fill="#f59e0b" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       )}
 
-      {/* Products Table */}
-      <div className="bg-supply-card rounded-lg overflow-hidden shadow-lg border border-gray-700">
+      {/* Inventory Table */}
+      <div className="card-modern overflow-hidden">
+        <div className="flex items-center gap-3 mb-6 px-6 pt-6">
+          <div className="w-10 h-10 rounded-lg bg-warning-100 flex items-center justify-center text-lg">
+            📦
+          </div>
+          <h2 className="gradient-text-primary text-xl font-bold">Inventory List</h2>
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-600 bg-supply-bg">
-                <th className="px-6 py-4 text-left text-gray-300 font-semibold">Warehouse</th>
-                <th className="px-6 py-4 text-left text-gray-300 font-semibold">Product Name</th>
-                <th className="px-6 py-4 text-center text-gray-300 font-semibold">Current Stock</th>
-                <th className="px-6 py-4 text-center text-gray-300 font-semibold">Reorder Point</th>
-                <th className="px-6 py-4 text-center text-gray-300 font-semibold">Status</th>
-                <th className="px-6 py-4 text-center text-gray-300 font-semibold">Last Updated</th>
+              <tr className="border-b border-slate-200 bg-slate-50">
+                <th className="px-6 py-4 text-left text-slate-700 font-semibold text-sm">🏭 Warehouse</th>
+                <th className="px-6 py-4 text-left text-slate-700 font-semibold text-sm">📦 Product</th>
+                <th className="px-6 py-4 text-center text-slate-700 font-semibold text-sm">Current Stock</th>
+                <th className="px-6 py-4 text-center text-slate-700 font-semibold text-sm">Reorder Point</th>
+                <th className="px-6 py-4 text-center text-slate-700 font-semibold text-sm">Status</th>
+                <th className="hidden sm:table-cell px-6 py-4 text-center text-slate-700 font-semibold text-sm">Updated</th>
               </tr>
             </thead>
             <tbody>
@@ -86,18 +111,24 @@ const Inventory = () => {
                 filteredProducts.map((product, idx) => {
                   const status = getStockStatus(product.quantity, product.reorder_point);
                   return (
-                    <tr key={idx} className="border-b border-gray-700 hover:bg-supply-bg/50 transition-colors">
-                      <td className="px-6 py-4 text-gray-300">{product.warehouse_name}</td>
-                      <td className="px-6 py-4 text-white">{product.product?.name || 'Unknown'}</td>
-                      <td className="px-6 py-4 text-center text-white font-semibold">{product.quantity}</td>
-                      <td className="px-6 py-4 text-center text-gray-400">{product.reorder_point}</td>
+                    <tr key={idx} className="border-b border-slate-200 hover:bg-slate-50 transition-colors duration-150">
+                      <td className="px-6 py-4 text-slate-700 text-sm font-medium">{product.warehouse_name}</td>
+                      <td className="px-6 py-4 text-slate-900 text-sm font-medium">{product.product?.name || 'Unknown'}</td>
+                      <td className="px-6 py-4 text-center text-slate-900 font-semibold text-sm">{product.quantity}</td>
+                      <td className="px-6 py-4 text-center text-slate-600 text-sm">{product.reorder_point}</td>
                       <td className="px-6 py-4 text-center">
-                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded ${status.bg} ${status.color} text-sm font-semibold`}>
-                          {product.quantity <= product.reorder_point && <AlertCircle className="w-3 h-3" />}
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold ${
+                          status.color === 'success' 
+                            ? 'bg-success-100 text-success-700' 
+                            : status.color === 'warning'
+                            ? 'bg-warning-100 text-warning-700'
+                            : 'bg-danger-100 text-danger-700'
+                        }`}>
+                          <span className="text-lg">{status.emoji}</span>
                           {status.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-center text-gray-500 text-sm">
+                      <td className="hidden sm:table-cell px-6 py-4 text-center text-slate-600 text-sm">
                         {new Date(product.last_updated).toLocaleString()}
                       </td>
                     </tr>
@@ -105,8 +136,9 @@ const Inventory = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan="6" className="px-6 py-8 text-center text-gray-400">
-                    {searchTerm ? 'No products found' : 'Loading inventory...'}
+                  <td colSpan="6" className="px-6 py-12 text-center">
+                    <Package className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                    <p className="text-slate-500 font-medium">{searchTerm ? 'No products found' : 'No inventory data'}</p>
                   </td>
                 </tr>
               )}
