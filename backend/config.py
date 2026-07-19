@@ -5,7 +5,7 @@ from typing import Optional
 # Database configuration
 DATABASE_URL: str = os.getenv(
     "DATABASE_URL",
-    "postgresql://postgres:password@localhost/supplysense"
+    "postgresql://suhaas@localhost/supplysense"
 )
 
 # Redis configuration

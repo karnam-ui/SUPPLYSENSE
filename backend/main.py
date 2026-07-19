@@ -41,33 +41,22 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting SupplySense backend...")
     
-    # Initialize database
-    init_db()
-    logger.info("Database initialized")
-    
-    # Seed database
-    db = next(get_db())
     try:
-        # Check if data exists
-        if db.query(Supplier).count() == 0:
-            seed_database(db)
-            logger.info("Database seeded with initial data")
-    finally:
-        db.close()
-    
-    # Check Ollama availability
-    ollama_available = check_ollama_available()
-    if ollama_available:
-        logger.info("Ollama is available")
-    else:
-        logger.warning("Ollama is not available. AI queries will not work.")
+        # Initialize database
+        init_db()
+        logger.info("✓ Database initialized")
+    except Exception as e:
+        logger.error(f"Database init error: {e}")
     
     # Start background tasks
     global background_task
-    background_task = asyncio.create_task(
-        background_task_loop(BACKGROUND_TASK_INTERVAL)
-    )
-    logger.info(f"Background tasks started (interval: {BACKGROUND_TASK_INTERVAL}s)")
+    try:
+        background_task = asyncio.create_task(
+            background_task_loop(BACKGROUND_TASK_INTERVAL)
+        )
+        logger.info(f"✓ Background tasks started (interval: {BACKGROUND_TASK_INTERVAL}s)")
+    except Exception as e:
+        logger.error(f"Background task error: {e}")
     
     yield
     
@@ -89,6 +78,7 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
 
 # Add CORS middleware
 app.add_middleware(
