@@ -35,9 +35,11 @@ def seed_database(db: Session) -> None:
     
     logger.info("Creating suppliers...")
     suppliers = create_suppliers(db)
+    db.flush()  # Get supplier IDs
     
     logger.info("Creating products...")
     products = create_products(db)
+    db.flush()  # Get product IDs - CRITICAL for inventory
     
     logger.info("Creating inventory...")
     create_inventory(db, products)
@@ -50,6 +52,7 @@ def seed_database(db: Session) -> None:
     
     db.commit()
     logger.info("Database seeding completed!")
+
 
 
 def create_suppliers(db: Session) -> list:

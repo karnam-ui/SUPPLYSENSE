@@ -197,11 +197,21 @@ def get_inventory(db: Session = Depends(get_db)) -> list:
         
         result = []
         for inv in inventories:
+            # Make sure the product relationship is loaded
+            product_data = None
+            if inv.product:
+                product_data = {
+                    "id": inv.product.id,
+                    "name": inv.product.name,
+                    "category": inv.product.category,
+                    "unit_price": inv.product.unit_price
+                }
+                
             item = InventoryResponse(
                 id=inv.id,
                 warehouse_name=inv.warehouse_name,
                 product_id=inv.product_id,
-                product=inv.product,
+                product=product_data,
                 quantity=inv.quantity,
                 reorder_point=inv.reorder_point,
                 last_updated=inv.last_updated,
@@ -218,6 +228,7 @@ def get_inventory(db: Session = Depends(get_db)) -> list:
     except Exception as e:
         logger.error(f"Error fetching inventory: {e}")
         raise HTTPException(status_code=500, detail="Error fetching inventory")
+
 
 
 # ============================================================================
