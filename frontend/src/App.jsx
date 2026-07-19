@@ -8,7 +8,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Activity,
-  Zap,
+  Sparkles,
+  Radio,
 } from 'lucide-react';
 import Overview from './components/Overview';
 import Inventory from './components/Inventory';
@@ -19,7 +20,6 @@ import AskSupplySense from './components/AskSupplySense';
 function App() {
   const [currentPage, setCurrentPage] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isLive, setIsLive] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
   useEffect(() => {
@@ -40,120 +40,87 @@ function App() {
   const currentComponent = pages[currentPage].component;
 
   return (
-    <div className="flex h-screen bg-gradient-bright">
-      {/* Sidebar */}
-      <div
-        className={`${
-          sidebarOpen ? 'w-64' : 'w-20'
-        } bg-white border-r border-slate-200 transition-all duration-300 flex flex-col shadow-md`}
-      >
-        {/* Logo */}
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-          {sidebarOpen && (
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-600 rounded-xl flex items-center justify-center shadow-md shadow-primary-500/30">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="gradient-text-primary text-lg font-bold">SupplySense</h1>
-                <p className="text-xs text-slate-500">Smart Supply Chain</p>
-              </div>
+    <div className="flex h-screen overflow-hidden bg-[#0a0e1a] text-[#e6edf3]">
+      <aside className={`${sidebarOpen ? 'w-60' : 'w-20'} flex min-w-0 flex-col border-r border-[#30363d] bg-[#0d1117] transition-all duration-300`}>
+        <div className="flex items-center justify-between border-b border-[#30363d] p-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#2563eb]/40 bg-[#111827] shadow-[0_0_20px_rgba(37,99,235,0.2)]">
+              <Sparkles className="h-5 w-5 text-[#60a5fa]" />
             </div>
-          )}
+            {sidebarOpen && (
+              <div>
+                <p className="text-sm font-semibold text-[#f8fbff]">SupplySense</p>
+                <p className="text-xs text-[#8b949e]">Enterprise Ops</p>
+              </div>
+            )}
+          </div>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-slate-400 hover:text-slate-600 transition-colors p-2 hover:bg-slate-100 rounded-lg"
+            className="rounded-xl border border-[#30363d] bg-[#161b22] p-2 text-[#8b949e] transition hover:border-[#2563eb]/40 hover:text-[#e6edf3]"
           >
-            {sidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+            {sidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 space-y-1 p-3">
           {Object.entries(pages).map(([key, page]) => {
             const Icon = page.icon;
             const isActive = currentPage === key;
-            
-            const emojiMap = {
-              overview: '📊',
-              inventory: '📦',
-              suppliers: '🚚',
-              forecasting: '📈',
-              ask: '🤖',
-            };
-            
-            const colorMap = {
-              overview: 'from-primary-500 to-primary-600',
-              inventory: 'from-warning-500 to-warning-600',
-              suppliers: 'from-accent-500 to-accent-600',
-              forecasting: 'from-success-500 to-success-600',
-              ask: 'from-accent-600 to-primary-600',
-            };
-            
+
             return (
               <button
                 key={key}
                 onClick={() => setCurrentPage(key)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                  isActive
-                    ? `bg-gradient-to-r ${colorMap[key]} text-white shadow-lg shadow-slate-300/50`
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
+                className={`sidebar-item ${isActive ? 'sidebar-item-active' : ''}`}
                 title={!sidebarOpen ? page.label : ''}
               >
-                <span className="text-lg flex-shrink-0">{emojiMap[key]}</span>
+                <Icon className={`h-4 w-4 ${isActive ? 'text-[#60a5fa]' : 'text-[#8b949e]'}`} />
                 {sidebarOpen && <span className="text-sm font-medium">{page.label}</span>}
               </button>
             );
           })}
         </nav>
 
-        {/* Live Indicator */}
-        <div className="p-4 border-t border-slate-100">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-success-500 rounded-full animate-pulse shadow-md shadow-success-500/50"></div>
+        <div className="border-t border-[#30363d] p-4">
+          <div className="flex items-center gap-3 rounded-2xl border border-[#263649] bg-[#161b22]/80 p-3">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#22c55e] opacity-75"></span>
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#22c55e]"></span>
+            </span>
             {sidebarOpen && (
-              <div className="flex-1">
-                <p className="text-xs font-semibold text-slate-700">Live Data</p>
-                <p className="text-xs text-slate-500">
-                  {lastUpdated.toLocaleTimeString()}
-                </p>
+              <div>
+                <p className="text-xs font-semibold text-[#e6edf3]">Live telemetry</p>
+                <p className="text-[11px] text-[#8b949e]">Updated {lastUpdated.toLocaleTimeString()}</p>
               </div>
             )}
           </div>
         </div>
-      </div>
+      </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Bar */}
-        <div className="bg-white border-b border-slate-100 px-8 py-4 flex items-center justify-between shadow-sm">
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="flex items-center justify-between border-b border-[#30363d] bg-[#0d1117]/90 px-6 py-4 backdrop-blur">
           <div>
-            <h2 className="gradient-text-primary text-2xl font-bold">{pages[currentPage].label}</h2>
-            <p className="text-sm text-slate-500 mt-1">Welcome back! Here's what's happening today.</p>
+            <h2 className="text-xl font-semibold text-[#f8fbff]">{pages[currentPage].label}</h2>
+            <p className="mt-1 text-sm text-[#8b949e]">Command center for planning, execution, and risk visibility.</p>
           </div>
-          <div className="flex items-center gap-6">
-            {/* Last Updated */}
-            <div className="flex items-center gap-2 text-sm">
-              <Activity className="w-4 h-4 text-primary-500" />
-              <span className="text-slate-600">
-                Updated: {lastUpdated.toLocaleTimeString()}
-              </span>
-            </div>
 
-            {/* Live Indicator */}
-            <div className="flex items-center gap-2 px-4 py-2 bg-gradient-glow-success rounded-lg border border-success-200">
-              <div className="w-2 h-2 bg-success-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-semibold text-success-700">Live</span>
+          <div className="flex items-center gap-3 rounded-full border border-[#30363d] bg-[#161b22] px-3 py-2">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#22c55e] opacity-80"></span>
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#22c55e]"></span>
+            </span>
+            <div className="flex items-center gap-2 text-sm text-[#e6edf3]">
+              <span>Live data</span>
+              <span className="text-[#8b949e]">•</span>
+              <span className="text-[#8b949e]">{lastUpdated.toLocaleTimeString()}</span>
             </div>
           </div>
-        </div>
+        </header>
 
-        {/* Page Content */}
-        <div className="flex-1 overflow-y-auto p-8">
+        <div className="flex-1 overflow-y-auto p-6 lg:p-8">
           {React.createElement(currentComponent)}
         </div>
-      </div>
+      </main>
     </div>
   );
 }

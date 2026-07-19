@@ -1,57 +1,48 @@
 import React from 'react';
-import { Clock } from 'lucide-react';
+import { Clock3, AlertTriangle, AlertCircle, CircleCheckBig } from 'lucide-react';
 
 const AlertCard = ({ alert }) => {
   const severityConfig = {
     critical: {
-      bg: 'from-danger-50 to-danger-100',
-      border: 'border-danger-200',
-      emoji: '🔴',
-      badge: 'status-danger',
-      text: 'text-danger-900',
-      subtext: 'text-danger-700',
+      border: 'border-[#ef4444]/70',
+      badge: 'status-chip-critical',
+      icon: AlertTriangle,
+      text: 'text-[#fca5a5]',
+      subtext: 'text-[#fda4af]',
     },
     warning: {
-      bg: 'from-warning-50 to-warning-100',
-      border: 'border-warning-200',
-      emoji: '🟠',
-      badge: 'status-warning',
-      text: 'text-warning-900',
-      subtext: 'text-warning-700',
+      border: 'border-[#f59e0b]/70',
+      badge: 'status-chip-warning',
+      icon: AlertCircle,
+      text: 'text-[#fcd34d]',
+      subtext: 'text-[#fde68a]',
     },
     success: {
-      bg: 'from-success-50 to-success-100',
-      border: 'border-success-200',
-      emoji: '🟢',
-      badge: 'status-success',
-      text: 'text-success-900',
-      subtext: 'text-success-700',
+      border: 'border-[#22c55e]/70',
+      badge: 'status-chip-success',
+      icon: CircleCheckBig,
+      text: 'text-[#86efac]',
+      subtext: 'text-[#bbf7d0]',
     },
   };
 
   const config = severityConfig[alert.severity] || severityConfig.success;
+  const Icon = config.icon;
 
   return (
-    <div className={`card-modern bg-gradient-to-br ${config.bg} border ${config.border} p-4`}>
+    <div className={`panel-hover rounded-2xl border bg-[#0d1117] p-4 ${config.border}`}>
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 text-lg mt-1">
-          {config.emoji}
+        <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#161b22] ${config.text}`}>
+          <Icon className="h-5 w-5" />
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <h4 className={`font-semibold text-sm ${config.text}`}>
-              {alert.title}
-            </h4>
-            <span className={`status-badge ${config.badge} text-xs flex-shrink-0`}>
-              {alert.severity}
-              {alert.severity === 'critical' && <span className="w-1.5 h-1.5 bg-current rounded-full ml-1 animate-pulse"></span>}
-            </span>
+        <div className="min-w-0 flex-1">
+          <div className="mb-2 flex items-start justify-between gap-2">
+            <h4 className="text-sm font-semibold text-[#f8fbff]">{alert.title}</h4>
+            <span className={`status-chip ${config.badge}`}>{alert.severity}</span>
           </div>
-          <p className={`text-sm mb-2 ${config.subtext}`}>
-            {alert.message}
-          </p>
-          <div className="flex items-center gap-1.5 text-xs opacity-70">
-            <Clock className="w-3 h-3" />
+          <p className={`mb-3 text-sm ${config.subtext}`}>{alert.message}</p>
+          <div className="flex items-center gap-2 text-xs text-[#8b949e]">
+            <Clock3 className="h-3.5 w-3.5" />
             <span>{new Date(alert.timestamp).toLocaleTimeString()}</span>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import useAPI from '../hooks/useAPI';
-import { TrendingUp, TrendingDown, ChevronDown, Users } from 'lucide-react';
+import { ChevronDown, Users, AlertTriangle, ShieldCheck, ArrowRight } from 'lucide-react';
 import KPICard from './KPICard';
 
 const Suppliers = () => {
@@ -21,10 +21,8 @@ const Suppliers = () => {
 
   const stats = useMemo(() => {
     if (suppliers.length === 0) return { total: 0, avgReliability: 0, atRisk: 0 };
-    const avgReliability = Math.round(
-      suppliers.reduce((acc, s) => acc + s.reliability_score, 0) / suppliers.length * 100
-    );
-    const atRisk = suppliers.filter(s => s.risk_level === 'HIGH').length;
+    const avgReliability = Math.round((suppliers.reduce((acc, supplier) => acc + supplier.reliability_score, 0) / suppliers.length) * 100);
+    const atRisk = suppliers.filter((supplier) => supplier.risk_level === 'HIGH').length;
     return {
       total: suppliers.length,
       avgReliability,
@@ -34,47 +32,36 @@ const Suppliers = () => {
 
   return (
     <div className="space-y-6">
-      {/* Stats KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <KPICard
-          title="🤝 Total Suppliers"
-          value={stats.total}
-          color="primary"
-        />
-        <KPICard
-          title="📈 Avg Reliability"
-          value={stats.avgReliability}
-          unit="%"
-          color="success"
-        />
-        <KPICard
-          title="🚨 At-Risk Count"
-          value={stats.atRisk}
-          color="danger"
-          critical={stats.atRisk > 0}
-        />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <KPICard title="Total suppliers" value={stats.total} color="primary" icon={Users} />
+        <KPICard title="Avg reliability" value={stats.avgReliability} unit="%" color="success" icon={ShieldCheck} />
+        <KPICard title="At-risk count" value={stats.atRisk} color="danger" critical={stats.atRisk > 0} icon={AlertTriangle} />
       </div>
 
-      {/* Suppliers Table */}
-      <div className="card-modern overflow-hidden">
-        <div className="flex items-center gap-3 mb-6 px-6 pt-6">
-          <div className="w-10 h-10 rounded-lg bg-accent-100 flex items-center justify-center text-lg">
-            📈
+      <div className="panel overflow-hidden">
+        <div className="border-b border-[#30363d] p-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#2563eb]/15 text-[#60a5fa]">
+              <Users className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-[#f8fbff]">Supplier portfolio</h3>
+              <p className="text-sm text-[#8b949e]">Reliability, delay, and exposure profile</p>
+            </div>
           </div>
-          <h2 className="gradient-text-primary text-xl font-bold">Suppliers List</h2>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="px-6 py-4 text-left text-slate-700 font-semibold text-sm w-8"></th>
-                <th className="px-6 py-4 text-left text-slate-700 font-semibold text-sm">Supplier Name</th>
-                <th className="px-6 py-4 text-center text-slate-700 font-semibold text-sm">Reliability</th>
-                <th className="hidden sm:table-cell px-6 py-4 text-center text-slate-700 font-semibold text-sm">Avg Delay</th>
-                <th className="hidden md:table-cell px-6 py-4 text-center text-slate-700 font-semibold text-sm">Total Orders</th>
-                <th className="hidden lg:table-cell px-6 py-4 text-center text-slate-700 font-semibold text-sm">Failed Orders</th>
-                <th className="px-6 py-4 text-center text-slate-700 font-semibold text-sm">Risk Level</th>
+          <table className="min-w-full">
+            <thead className="bg-[#0d1117]">
+              <tr>
+                <th className="w-10 px-4 py-3 text-left"></th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-[#8b949e]">Supplier</th>
+                <th className="px-4 py-3 text-center text-sm font-semibold text-[#8b949e]">Reliability</th>
+                <th className="hidden px-4 py-3 text-center text-sm font-semibold text-[#8b949e] sm:table-cell">Avg delay</th>
+                <th className="hidden px-4 py-3 text-center text-sm font-semibold text-[#8b949e] md:table-cell">Orders</th>
+                <th className="hidden px-4 py-3 text-center text-sm font-semibold text-[#8b949e] lg:table-cell">Failed</th>
+                <th className="px-4 py-3 text-center text-sm font-semibold text-[#8b949e]">Risk</th>
               </tr>
             </thead>
             <tbody>
@@ -82,79 +69,44 @@ const Suppliers = () => {
                 suppliers.map((supplier, idx) => {
                   const reliability = Math.round(supplier.reliability_score * 100);
                   const riskColor = getRiskColor(supplier.risk_level);
+                  const riskClass = riskColor === 'danger' ? 'status-chip-critical' : riskColor === 'warning' ? 'status-chip-warning' : 'status-chip-success';
                   return (
                     <React.Fragment key={idx}>
-                      <tr
-                        className="border-b border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"
-                        onClick={() => setExpandedSupplier(expandedSupplier === idx ? null : idx)}
-                      >
-                        <td className="px-6 py-4 text-slate-600">
-                          <ChevronDown
-                            className={`w-4 h-4 transition-transform ${expandedSupplier === idx ? 'rotate-180' : ''}`}
-                          />
+                      <tr className="cursor-pointer border-t border-[#30363d] bg-[#161b22]/50 transition hover:bg-[#161b22]" onClick={() => setExpandedSupplier(expandedSupplier === idx ? null : idx)}>
+                        <td className="px-4 py-4 text-[#8b949e]">
+                          <ChevronDown className={`h-4 w-4 transition ${expandedSupplier === idx ? 'rotate-180' : ''}`} />
                         </td>
-                        <td className="px-6 py-4 text-slate-900 font-semibold text-sm truncate">{supplier.name}</td>
-                        <td className="px-6 py-4 text-center">
-                          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold ${
-                            reliability >= 90 
-                              ? 'bg-success-100 text-success-700' 
-                              : reliability >= 75
-                              ? 'bg-warning-100 text-warning-700'
-                              : 'bg-danger-100 text-danger-700'
-                          }`}>
-                            {reliability}%
-                          </span>
+                        <td className="px-4 py-4 text-sm font-semibold text-[#f8fbff]">{supplier.name}</td>
+                        <td className="px-4 py-4 text-center">
+                          <span className={`status-chip ${reliability >= 90 ? 'status-chip-success' : reliability >= 75 ? 'status-chip-warning' : 'status-chip-critical'}`}>{reliability}%</span>
                         </td>
-                        <td className="hidden sm:table-cell px-6 py-4 text-center text-slate-700 text-sm">{Math.round(supplier.avg_delay_days)}d</td>
-                        <td className="hidden md:table-cell px-6 py-4 text-center text-slate-900 font-semibold text-sm">{supplier.total_orders}</td>
-                        <td className="hidden lg:table-cell px-6 py-4 text-center text-slate-700 text-sm">{supplier.failed_orders}</td>
-                        <td className="px-6 py-4 text-center">
-                          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold ${
-                            riskColor === 'danger'
-                              ? 'bg-danger-100 text-danger-700'
-                              : riskColor === 'warning'
-                              ? 'bg-warning-100 text-warning-700'
-                              : 'bg-success-100 text-success-700'
-                          }`}>
-                            <span className="text-lg">
-                              {supplier.risk_level === 'HIGH' ? '🔴' : supplier.risk_level === 'MEDIUM' ? '🟡' : '🟢'}
-                            </span>
-                            <span className="hidden sm:inline">{supplier.risk_level}</span>
-                          </span>
+                        <td className="hidden px-4 py-4 text-center text-sm text-[#8b949e] sm:table-cell">{Math.round(supplier.avg_delay_days)}d</td>
+                        <td className="hidden px-4 py-4 text-center text-sm text-[#f8fbff] md:table-cell">{supplier.total_orders}</td>
+                        <td className="hidden px-4 py-4 text-center text-sm text-[#8b949e] lg:table-cell">{supplier.failed_orders}</td>
+                        <td className="px-4 py-4 text-center">
+                          <span className={`status-chip ${riskClass}`}>{supplier.risk_level}</span>
                         </td>
                       </tr>
 
-                      {/* Expanded Row - Details */}
                       {expandedSupplier === idx && (
-                        <tr className="bg-gradient-to-r from-primary-50 to-accent-50 border-b border-primary-200">
-                          <td colSpan="7" className="px-6 py-4">
-                            <div className="space-y-4">
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-white rounded-lg border border-slate-200">
-                                <div>
-                                  <p className="text-xs font-semibold text-slate-600 uppercase mb-1">Created</p>
-                                  <p className="text-slate-900 font-semibold">{new Date(supplier.created_at).toLocaleDateString()}</p>
-                                </div>
-                                <div>
-                                  <p className="text-xs font-semibold text-slate-600 uppercase mb-1">Updated</p>
-                                  <p className="text-slate-900 font-semibold">{new Date(supplier.updated_at).toLocaleDateString()}</p>
-                                </div>
-                                <div>
-                                  <p className="text-xs font-semibold text-slate-600 uppercase mb-1">Success Rate</p>
-                                  <p className="text-slate-900 font-semibold">{Math.round((supplier.total_orders - supplier.failed_orders) / supplier.total_orders * 100)}%</p>
-                                </div>
-                                <div>
-                                  <p className="text-xs font-semibold text-slate-600 uppercase mb-1">Reliability</p>
-                                  <p className={`font-semibold ${reliability >= 90 ? 'text-success-700' : reliability >= 75 ? 'text-warning-700' : 'text-danger-700'}`}>
-                                    {(supplier.reliability_score * 100).toFixed(1)}%
-                                  </p>
-                                </div>
+                        <tr className="border-t border-[#30363d] bg-[#0d1117]">
+                          <td colSpan="7" className="px-4 py-4">
+                            <div className="grid gap-4 rounded-2xl border border-[#30363d] bg-[#161b22] p-4 md:grid-cols-4">
+                              <div>
+                                <p className="text-xs uppercase tracking-[0.25em] text-[#8b949e]">Created</p>
+                                <p className="mt-1 text-sm text-[#f8fbff]">{new Date(supplier.created_at).toLocaleDateString()}</p>
                               </div>
-                              <button
-                                onClick={() => setSelectedSupplier(supplier)}
-                                className="btn-primary"
-                              >
-                                View Details
-                              </button>
+                              <div>
+                                <p className="text-xs uppercase tracking-[0.25em] text-[#8b949e]">Updated</p>
+                                <p className="mt-1 text-sm text-[#f8fbff]">{new Date(supplier.updated_at).toLocaleDateString()}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs uppercase tracking-[0.25em] text-[#8b949e]">Success rate</p>
+                                <p className="mt-1 text-sm text-[#f8fbff]">{Math.round(((supplier.total_orders - supplier.failed_orders) / supplier.total_orders) * 100)}%</p>
+                              </div>
+                              <div>
+                                <button onClick={() => setSelectedSupplier(supplier)} className="btn-primary w-full">View details</button>
+                              </div>
                             </div>
                           </td>
                         </tr>
@@ -164,9 +116,9 @@ const Suppliers = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center">
-                    <Users className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-                    <p className="text-slate-500 font-medium">Loading suppliers...</p>
+                  <td colSpan="7" className="px-4 py-12 text-center text-[#8b949e]">
+                    <Users className="mx-auto mb-3 h-10 w-10" />
+                    Loading suppliers...
                   </td>
                 </tr>
               )}
@@ -175,71 +127,37 @@ const Suppliers = () => {
         </div>
       </div>
 
-      {/* Supplier Detail Modal */}
       {selectedSupplier && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="card-modern w-full max-w-lg">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="gradient-text-primary text-2xl font-bold">{selectedSupplier.name}</h2>
-              <button
-                onClick={() => setSelectedSupplier(null)}
-                className="text-slate-400 hover:text-slate-600 text-2xl"
-              >
-                ×
-              </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="panel w-full max-w-lg p-6">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#2563eb]">Supplier profile</p>
+                <h3 className="mt-1 text-xl font-semibold text-[#f8fbff]">{selectedSupplier.name}</h3>
+              </div>
+              <button onClick={() => setSelectedSupplier(null)} className="text-2xl text-[#8b949e] transition hover:text-[#e6edf3]">×</button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="p-4 bg-gradient-to-br from-success-50 to-success-100 border border-success-200 rounded-lg">
-                <p className="text-xs font-semibold text-success-600 uppercase mb-1">Reliability</p>
-                <p className="text-3xl font-bold text-success-900">
-                  {Math.round(selectedSupplier.reliability_score * 100)}%
-                </p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-2xl border border-[#30363d] bg-[#0d1117] p-4">
+                <p className="text-xs uppercase tracking-[0.25em] text-[#8b949e]">Reliability</p>
+                <p className="mt-2 text-2xl font-semibold text-[#86efac]">{Math.round(selectedSupplier.reliability_score * 100)}%</p>
               </div>
-              <div className="p-4 bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200 rounded-lg">
-                <p className="text-xs font-semibold text-primary-600 uppercase mb-1">Avg Delay</p>
-                <p className="text-3xl font-bold text-primary-900">
-                  {Math.round(selectedSupplier.avg_delay_days)}d
-                </p>
+              <div className="rounded-2xl border border-[#30363d] bg-[#0d1117] p-4">
+                <p className="text-xs uppercase tracking-[0.25em] text-[#8b949e]">Avg delay</p>
+                <p className="mt-2 text-2xl font-semibold text-[#f8fbff]">{Math.round(selectedSupplier.avg_delay_days)}d</p>
               </div>
-              <div className="p-4 bg-gradient-to-br from-warning-50 to-warning-100 border border-warning-200 rounded-lg">
-                <p className="text-xs font-semibold text-warning-600 uppercase mb-1">Total Orders</p>
-                <p className="text-3xl font-bold text-warning-900">
-                  {selectedSupplier.total_orders}
-                </p>
+              <div className="rounded-2xl border border-[#30363d] bg-[#0d1117] p-4">
+                <p className="text-xs uppercase tracking-[0.25em] text-[#8b949e]">Total orders</p>
+                <p className="mt-2 text-2xl font-semibold text-[#f8fbff]">{selectedSupplier.total_orders}</p>
               </div>
-              <div className={`p-4 bg-gradient-to-br ${
-                selectedSupplier.risk_level === 'HIGH'
-                  ? 'from-danger-50 to-danger-100 border-danger-200'
-                  : selectedSupplier.risk_level === 'MEDIUM'
-                  ? 'from-warning-50 to-warning-100 border-warning-200'
-                  : 'from-success-50 to-success-100 border-success-200'
-              } border rounded-lg`}>
-                <p className="text-xs font-semibold uppercase mb-1 ${
-                  selectedSupplier.risk_level === 'HIGH'
-                    ? 'text-danger-600'
-                    : selectedSupplier.risk_level === 'MEDIUM'
-                    ? 'text-warning-600'
-                    : 'text-success-600'
-                }">Risk Level</p>
-                <p className={`text-3xl font-bold ${
-                  selectedSupplier.risk_level === 'HIGH'
-                    ? 'text-danger-900'
-                    : selectedSupplier.risk_level === 'MEDIUM'
-                    ? 'text-warning-900'
-                    : 'text-success-900'
-                }`}>
-                  {selectedSupplier.risk_level}
-                </p>
+              <div className="rounded-2xl border border-[#30363d] bg-[#0d1117] p-4">
+                <p className="text-xs uppercase tracking-[0.25em] text-[#8b949e]">Risk level</p>
+                <p className="mt-2 text-2xl font-semibold text-[#fda4af]">{selectedSupplier.risk_level}</p>
               </div>
             </div>
 
-            <button
-              onClick={() => setSelectedSupplier(null)}
-              className="w-full py-3 px-4 bg-gradient-to-r from-primary-500 to-accent-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-200"
-            >
-              Close
-            </button>
+            <button onClick={() => setSelectedSupplier(null)} className="btn-primary mt-6 w-full">Close</button>
           </div>
         </div>
       )}

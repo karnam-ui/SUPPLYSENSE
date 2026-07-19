@@ -10,8 +10,10 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { TrendingUp, Calendar } from 'lucide-react';
+import { TrendingUp, CalendarRange, Sparkles } from 'lucide-react';
 import axios from 'axios';
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const Forecasting = () => {
   const { data: inventoryData } = useAPI('/inventory');
@@ -23,7 +25,7 @@ const Forecasting = () => {
     if (!Array.isArray(inventoryData)) return [];
     const seen = new Set();
     const uniqueProducts = [];
-    inventoryData.forEach(item => {
+    inventoryData.forEach((item) => {
       if (item.product_id && !seen.has(item.product_id)) {
         seen.add(item.product_id);
         uniqueProducts.push({
@@ -36,14 +38,14 @@ const Forecasting = () => {
     return uniqueProducts;
   }, [inventoryData]);
 
-  const currentProductId = selectedProductId || (products[0]?.id) || null;
+  const currentProductId = selectedProductId || products[0]?.id || null;
 
   useEffect(() => {
     if (currentProductId) {
       setLoadingForecast(true);
       axios
-        .get(`http://localhost:8000/forecast/${currentProductId}`)
-        .then(res => {
+        .get(`${API_BASE}/forecast/${currentProductId}`)
+        .then((res) => {
           const data = res.data.forecast_data.map((item, idx) => {
             const date = new Date();
             date.setDate(date.getDate() + idx);
@@ -60,7 +62,7 @@ const Forecasting = () => {
             forecast_data: data,
           });
         })
-        .catch(err => {
+        .catch((err) => {
           console.error('Error fetching forecast:', err);
           setForecastData(null);
         })
@@ -68,25 +70,20 @@ const Forecasting = () => {
     }
   }, [currentProductId]);
 
-  const currentProduct = useMemo(() => {
-    return products.find(p => p.id === currentProductId) || products[0];
-  }, [currentProductId, products]);
-
   const chartData = forecastData?.forecast_data || [];
   const accuracy = forecastData?.model_accuracy || 0;
 
   return (
     <div className="space-y-6">
-      {/* Product Selector & Accuracy */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="md:col-span-2 card-modern">
-          <label className="block text-slate-700 text-sm font-semibold mb-3">📦 Select Product for Forecast</label>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[1.3fr_0.7fr]">
+        <div className="panel p-5">
+          <label className="mb-3 block text-sm font-semibold text-[#8b949e]">Select product for forecast</label>
           <select
             value={currentProductId || ''}
-            onChange={(e) => setSelectedProductId(parseInt(e.target.value))}
-            className="input-modern w-full"
+            onChange={(e) => setSelectedProductId(parseInt(e.target.value, 10))}
+            className="input-modern"
           >
-            {products.map(product => (
+            {products.map((product) => (
               <option key={product.id} value={product.id}>
                 {product.name} (ID: {product.id})
               </option>
@@ -94,82 +91,43 @@ const Forecasting = () => {
           </select>
         </div>
 
-        {/* Accuracy Card */}
-        <div className="card-modern bg-gradient-to-br from-success-50 to-success-100 border border-success-200">
-          <p className="text-success-600 text-sm font-semibold mb-2 uppercase">Model Accuracy</p>
-          <div className="flex items-end gap-2">
-            <h3 className="text-success-900 font-bold text-3xl">{accuracy.toFixed(1)}%</h3>
-            <TrendingUp className="w-5 h-5 text-success-600" />
+        <div className="panel p-5">
+          <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.25em] text-[#2563eb]">
+            <Sparkles className="h-4 w-4" />
+            Model accuracy
           </div>
+          <div className="mt-4 flex items-end gap-2">
+            <h3 className="text-3xl font-semibold text-[#f8fbff]">{accuracy.toFixed(1)}%</h3>
+            <TrendingUp className="mb-1 h-5 w-5 text-[#86efac]" />
+          </div>
+          <p className="mt-2 text-sm text-[#8b949e]">Historical signal and confidence blended by the forecasting engine.</p>
         </div>
       </div>
 
-      {/* Main Forecast Chart */}
       {chartData.length > 0 && !loadingForecast && (
-        <div className="card-modern">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center text-lg">
-              🔮
+        <div className="panel p-5">
+          <div className="mb-5 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#2563eb]/15 text-[#60a5fa]">
+              <CalendarRange className="h-5 w-5" />
             </div>
-            <h2 className="gradient-text-primary text-xl font-bold">30-Day Demand Forecast</h2>
+            <div>
+              <h3 className="text-lg font-semibold text-[#f8fbff]">30-day demand forecast</h3>
+              <p className="text-sm text-[#8b949e]">Historical trend vs predicted demand</p>
+            </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <ResponsiveContainer width="100%" height={400}>
+          <div className="h-[360px]">
+            <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis
-                  dataKey="date"
-                  stroke="#64748b"
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                />
-                <YAxis stroke="#64748b" />
-                <Tooltip
-                  contentStyle={{ 
-                    backgroundColor: '#ffffff', 
-                    border: '1px solid #e2e8f0', 
-                    borderRadius: '0.75rem',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
-                  }}
-                  labelStyle={{ color: '#1e293b' }}
-                />
+                <CartesianGrid stroke="#21262d" strokeDasharray="3 3" />
+                <XAxis dataKey="date" stroke="#8b949e" tickLine={false} axisLine={false} angle={-20} textAnchor="end" height={70} />
+                <YAxis stroke="#8b949e" tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ backgroundColor: '#0d1117', border: '1px solid #30363d', borderRadius: '0.9rem' }} labelStyle={{ color: '#e6edf3' }} />
                 <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="historical"
-                  stroke="#0284c7"
-                  name="Historical"
-                  dot={{ r: 2 }}
-                  strokeWidth={2}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="forecast"
-                  stroke="#22c55e"
-                  strokeDasharray="5 5"
-                  name="Forecast"
-                  dot={{ r: 2 }}
-                  strokeWidth={2}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="confidence_upper"
-                  stroke="#cbd5e1"
-                  strokeDasharray="2 2"
-                  name="Confidence Range"
-                  dot={false}
-                  strokeWidth={1}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="confidence_lower"
-                  stroke="#cbd5e1"
-                  strokeDasharray="2 2"
-                  dot={false}
-                  strokeWidth={1}
-                />
+                <Line type="monotone" dataKey="historical" stroke="#3b82f6" name="Historical" dot={{ r: 2 }} strokeWidth={2.2} />
+                <Line type="monotone" dataKey="forecast" stroke="#f97316" name="Forecast" strokeDasharray="5 5" dot={{ r: 2 }} strokeWidth={2.2} />
+                <Line type="monotone" dataKey="confidence_upper" stroke="#52525b" strokeDasharray="2 2" name="Confidence Range" dot={false} strokeWidth={1} />
+                <Line type="monotone" dataKey="confidence_lower" stroke="#52525b" strokeDasharray="2 2" dot={false} strokeWidth={1} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -177,77 +135,57 @@ const Forecasting = () => {
       )}
 
       {loadingForecast && (
-        <div className="card-modern flex flex-col items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mb-4"></div>
-          <p className="text-slate-600 font-medium">Loading forecast data...</p>
+        <div className="panel flex flex-col items-center justify-center py-16">
+          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-[#2563eb]"></div>
+          <p className="text-[#8b949e]">Loading forecast data…</p>
         </div>
       )}
 
-      {/* Stats Grid */}
       {forecastData && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="card-modern bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200">
-            <p className="text-primary-600 text-sm font-semibold mb-2 uppercase">🎯 Accuracy</p>
-            <h3 className="text-primary-900 font-bold text-2xl">{accuracy.toFixed(1)}%</h3>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="panel p-4">
+            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#8b949e]">Accuracy</p>
+            <p className="mt-2 text-2xl font-semibold text-[#f8fbff]">{accuracy.toFixed(1)}%</p>
           </div>
-          <div className="card-modern bg-gradient-to-br from-accent-50 to-accent-100 border border-accent-200">
-            <p className="text-accent-600 text-sm font-semibold mb-2 uppercase">📅 Period</p>
-            <h3 className="text-accent-900 font-bold text-2xl">30 Days</h3>
+          <div className="panel p-4">
+            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#8b949e]">Period</p>
+            <p className="mt-2 text-2xl font-semibold text-[#f8fbff]">30 days</p>
           </div>
-          <div className="card-modern bg-gradient-to-br from-warning-50 to-warning-100 border border-warning-200">
-            <p className="text-warning-600 text-sm font-semibold mb-2 uppercase">📊 Avg Demand</p>
-            <h3 className="text-warning-900 font-bold text-2xl">
-              {Math.round(chartData.reduce((sum, d) => sum + d.forecast, 0) / chartData.length) || 0}
-            </h3>
+          <div className="panel p-4">
+            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#8b949e]">Avg demand</p>
+            <p className="mt-2 text-2xl font-semibold text-[#f8fbff]">{Math.round(chartData.reduce((sum, item) => sum + item.forecast, 0) / chartData.length) || 0}</p>
           </div>
-          <div className="card-modern bg-gradient-to-br from-success-50 to-success-100 border border-success-200">
-            <p className="text-success-600 text-sm font-semibold mb-2 uppercase">📈 Total</p>
-            <h3 className="text-success-900 font-bold text-2xl">
-              {Math.round(chartData.reduce((sum, d) => sum + d.forecast, 0)) || 0}
-            </h3>
+          <div className="panel p-4">
+            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#8b949e]">Total</p>
+            <p className="mt-2 text-2xl font-semibold text-[#f8fbff]">{Math.round(chartData.reduce((sum, item) => sum + item.forecast, 0)) || 0}</p>
           </div>
         </div>
       )}
 
-      {/* Insights */}
       {forecastData && (
-        <div className="card-modern">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-lg bg-accent-100 flex items-center justify-center text-lg">
-              💡
+        <div className="panel p-5">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f59e0b]/15 text-[#fcd34d]">
+              <Sparkles className="h-5 w-5" />
             </div>
-            <h2 className="gradient-text-primary text-xl font-bold">Forecast Insights</h2>
+            <div>
+              <h3 className="text-lg font-semibold text-[#f8fbff]">Forecast insights</h3>
+              <p className="text-sm text-[#8b949e]">Signals to guide purchasing decisions</p>
+            </div>
           </div>
 
           <div className="space-y-3">
-            <div className="flex gap-4 p-4 bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200 rounded-lg hover:shadow-md transition-shadow">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center font-semibold text-sm">1</div>
-              <p className="text-primary-900 text-sm">Model accuracy: <span className="font-semibold">{accuracy.toFixed(1)}%</span> based on historical data</p>
-            </div>
-            <div className="flex gap-4 p-4 bg-gradient-to-br from-accent-50 to-accent-100 border border-accent-200 rounded-lg hover:shadow-md transition-shadow">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent-600 text-white flex items-center justify-center font-semibold text-sm">2</div>
-              <p className="text-accent-900 text-sm">
-                Total 30-day forecast: <span className="font-semibold">{Math.round(chartData.reduce((sum, d) => sum + d.forecast, 0)) || 0} units</span>
-              </p>
-            </div>
-            <div className="flex gap-4 p-4 bg-gradient-to-br from-warning-50 to-warning-100 border border-warning-200 rounded-lg hover:shadow-md transition-shadow">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-warning-600 text-white flex items-center justify-center font-semibold text-sm">3</div>
-              <p className="text-warning-900 text-sm">
-                Average daily demand: <span className="font-semibold">{Math.round(chartData.reduce((sum, d) => sum + d.forecast, 0) / chartData.length) || 0} units</span>
-              </p>
-            </div>
-            <div className="flex gap-4 p-4 bg-gradient-to-br from-success-50 to-success-100 border border-success-200 rounded-lg hover:shadow-md transition-shadow">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-success-600 text-white flex items-center justify-center font-semibold text-sm">4</div>
-              <p className="text-success-900 text-sm">Confidence interval shows ±15% prediction range</p>
-            </div>
+            <div className="rounded-2xl border border-[#30363d] bg-[#0d1117] p-4 text-sm text-[#e6edf3]">Model accuracy is {accuracy.toFixed(1)}% backed by the latest historical demand pattern.</div>
+            <div className="rounded-2xl border border-[#30363d] bg-[#0d1117] p-4 text-sm text-[#e6edf3]">Projected total demand over the next 30 days is {Math.round(chartData.reduce((sum, item) => sum + item.forecast, 0)) || 0} units.</div>
+            <div className="rounded-2xl border border-[#30363d] bg-[#0d1117] p-4 text-sm text-[#e6edf3]">Average daily demand is {Math.round(chartData.reduce((sum, item) => sum + item.forecast, 0) / chartData.length) || 0} units with a ±15% confidence band.</div>
           </div>
         </div>
       )}
 
       {!products.length && (
-        <div className="card-modern py-12 text-center">
-          <Calendar className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-          <p className="text-slate-500 font-medium">No products available for forecasting</p>
+        <div className="panel py-12 text-center text-[#8b949e]">
+          <CalendarRange className="mx-auto mb-3 h-10 w-10" />
+          No products available for forecasting yet.
         </div>
       )}
     </div>

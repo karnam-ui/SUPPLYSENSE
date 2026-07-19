@@ -1,97 +1,75 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
+import { AlertTriangle, Activity, Package, TrendingUp, TrendingDown, AlertCircle, LayoutDashboard } from 'lucide-react';
 
-const KPICard = ({ title, value, unit = '', trend = null, color = 'primary', threshold = null, critical = false }) => {
+const KPICard = ({ title, value, unit = '', trend = null, color = 'primary', threshold = null, critical = false, icon: IconProp }) => {
   const isTrendPositive = trend ? trend > 0 : null;
   const isAboveThreshold = threshold && value > threshold;
 
   const colorMap = {
     primary: {
-      bg: 'from-primary-50 to-primary-100',
-      border: 'border-primary-200',
-      text: 'text-primary-900',
-      value: 'text-primary-700',
-      icon: 'bg-primary-100 text-primary-600',
-      trend: 'text-primary-600',
-      emoji: '📊',
+      iconBg: 'bg-[#1d4ed8]/20 text-[#60a5fa]',
+      accent: 'text-[#60a5fa]',
+      border: critical ? 'border-[#ef4444]/50' : 'border-[#30363d]',
+      value: 'text-[#f8fbff]',
+      muted: 'text-[#8b949e]',
+      defaultIcon: LayoutDashboard,
     },
     success: {
-      bg: 'from-success-50 to-success-100',
-      border: 'border-success-200',
-      text: 'text-success-900',
-      value: 'text-success-700',
-      icon: 'bg-success-100 text-success-600',
-      trend: 'text-success-600',
-      emoji: '✅',
+      iconBg: 'bg-[#16a34a]/15 text-[#86efac]',
+      accent: 'text-[#86efac]',
+      border: critical ? 'border-[#ef4444]/50' : 'border-[#30363d]',
+      value: 'text-[#f8fbff]',
+      muted: 'text-[#8b949e]',
+      defaultIcon: Activity,
     },
     warning: {
-      bg: 'from-warning-50 to-warning-100',
-      border: 'border-warning-200',
-      text: 'text-warning-900',
-      value: 'text-warning-700',
-      icon: 'bg-warning-100 text-warning-600',
-      trend: 'text-warning-600',
-      emoji: '📦',
+      iconBg: 'bg-[#f59e0b]/15 text-[#fcd34d]',
+      accent: 'text-[#fcd34d]',
+      border: critical ? 'border-[#ef4444]/50' : 'border-[#30363d]',
+      value: 'text-[#f8fbff]',
+      muted: 'text-[#8b949e]',
+      defaultIcon: Package,
     },
     danger: {
-      bg: 'from-danger-50 to-danger-100',
-      border: 'border-danger-200',
-      text: 'text-danger-900',
-      value: 'text-danger-700',
-      icon: 'bg-danger-100 text-danger-600',
-      trend: 'text-danger-600',
-      emoji: '⚠️',
+      iconBg: 'bg-[#ef4444]/15 text-[#fda4af]',
+      accent: 'text-[#fda4af]',
+      border: critical ? 'border-[#ef4444]/70' : 'border-[#30363d]',
+      value: 'text-[#f8fbff]',
+      muted: 'text-[#8b949e]',
+      defaultIcon: AlertTriangle,
     },
   };
 
   const config = colorMap[color] || colorMap.primary;
+  const Icon = IconProp || config.defaultIcon;
 
   return (
-    <div className={`card-modern bg-gradient-to-br ${config.bg} border ${config.border} p-6 group`}>
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex items-center gap-3">
-          <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-xl ${config.icon}`}>
-            {config.emoji}
+    <div className={`panel panel-hover border ${config.border} p-5`}> 
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-medium text-[#8b949e]">{title}</p>
+          <div className="mt-3 flex items-end gap-2">
+            <h3 className={`text-3xl font-semibold tabular-nums ${config.value}`}>{value}</h3>
+            {unit && <span className={`pb-1 text-sm ${config.muted}`}>{unit}</span>}
           </div>
-          <p className={`text-sm font-semibold ${config.text}`}>{title}</p>
         </div>
-        {critical && (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-danger-100 text-danger-700 rounded-full text-xs font-semibold">
-            <span className="w-2 h-2 bg-danger-600 rounded-full animate-pulse"></span>
-            Critical
-          </div>
-        )}
-      </div>
-
-      <div className="flex items-end gap-2 mb-4">
-        <h3 className={`text-3xl font-bold ${config.value} tabular-nums`}>
-          {value}
-        </h3>
-        {unit && (
-          <span className={`text-base font-medium ${config.text} opacity-70`}>
-            {unit}
-          </span>
-        )}
+        <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${config.iconBg}`}>
+          <Icon className="h-5 w-5" />
+        </div>
       </div>
 
       {(trend !== null || isAboveThreshold) && (
-        <div className={`flex items-center gap-3 pt-3 border-t ${config.border}`}>
+        <div className="mt-4 flex items-center gap-3 border-t border-[#30363d] pt-3 text-sm">
           {trend !== null && (
-            <div className={`flex items-center gap-1.5 text-sm font-medium ${
-              isTrendPositive ? 'text-danger-600' : 'text-success-600'
-            }`}>
-              {isTrendPositive ? (
-                <TrendingUp className="w-4 h-4" />
-              ) : (
-                <TrendingDown className="w-4 h-4" />
-              )}
-              <span>{Math.abs(trend)}% {isTrendPositive ? 'increase' : 'decrease'}</span>
+            <div className={`flex items-center gap-1.5 ${isTrendPositive ? 'text-[#fca5a5]' : 'text-[#86efac]'}`}>
+              {isTrendPositive ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+              <span>{Math.abs(trend)}% {isTrendPositive ? 'up' : 'down'}</span>
             </div>
           )}
           {isAboveThreshold && (
-            <div className="flex items-center gap-1.5 text-sm font-medium text-warning-600 ml-auto">
-              <AlertCircle className="w-4 h-4" />
-              <span>Above threshold</span>
+            <div className="ml-auto flex items-center gap-1.5 text-[#fcd34d]">
+              <AlertCircle className="h-4 w-4" />
+              <span>Threshold</span>
             </div>
           )}
         </div>

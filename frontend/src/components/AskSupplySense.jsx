@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Send } from 'lucide-react';
+import { Send, Bot, Sparkles, LoaderCircle } from 'lucide-react';
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const AskSupplySense = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hi! I'm SupplySense AI. Ask me anything about your supply chain - inventory levels, supplier performance, demand forecasts, or recommendations.",
+      text: "Hi! I'm SupplySense AI. Ask anything about inventory, suppliers, forecasts, or risk exposure.",
       sender: 'bot',
       timestamp: new Date(),
     },
@@ -16,10 +18,10 @@ const AskSupplySense = () => {
   const messagesEndRef = useRef(null);
 
   const exampleQueries = [
-    "Which suppliers are highest risk?",
-    "Which products need restocking?",
+    'Which suppliers are highest risk?',
+    'Which products need restocking?',
     "What's our biggest supply chain risk?",
-    "Critical shortage alerts?"
+    'Critical shortage alerts?',
   ];
 
   const scrollToBottom = () => {
@@ -41,12 +43,12 @@ const AskSupplySense = () => {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputValue('');
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:8000/query', {
+      const response = await axios.post(`${API_BASE}/query`, {
         question: inputValue,
       });
 
@@ -57,15 +59,15 @@ const AskSupplySense = () => {
         timestamp: new Date(),
       };
 
-      setMessages(prev => [...prev, botMessage]);
+      setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       const errorMessage = {
         id: messages.length + 2,
-        text: "Sorry, I couldn't process your request. Please try again. Make sure Ollama is running locally.",
+        text: "Sorry, I couldn't process that request. Please try again and confirm the local API is reachable.",
         sender: 'bot',
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setLoading(false);
     }
@@ -76,92 +78,76 @@ const AskSupplySense = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)]">
-      {/* Chat Header */}
-      <div className="bg-white border-b border-slate-200 px-8 py-6 mb-6 rounded-lg shadow-sm">
+    <div className="flex h-[calc(100vh-130px)] flex-col gap-4">
+      <div className="panel p-5">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-accent-500 to-primary-600 flex items-center justify-center text-2xl shadow-md">
-            🤖
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#2563eb]/15 text-[#60a5fa]">
+            <Bot className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="gradient-text-primary text-2xl font-bold">Ask SupplySense</h1>
-            <p className="text-slate-500 text-sm">AI-powered supply chain insights</p>
+            <h3 className="text-lg font-semibold text-[#f8fbff]">Ask SupplySense</h3>
+            <p className="text-sm text-[#8b949e]">AI assistant for planning, risk, and procurement context</p>
           </div>
         </div>
       </div>
 
-      {/* Example Queries */}
       {messages.length === 1 && (
-        <div className="card-modern mb-6">
-          <p className="text-slate-700 text-sm font-semibold mb-4">💡 Try asking:</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="panel p-4">
+          <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[#8b949e]">
+            <Sparkles className="h-4 w-4 text-[#f59e0b]" />
+            Try a prompt
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">
             {exampleQueries.map((query, idx) => (
               <button
                 key={idx}
                 onClick={() => handleExampleQuery(query)}
-                className="text-left p-3 bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200 text-primary-900 rounded-lg hover:shadow-md hover:border-primary-300 transition-all duration-200 font-medium text-sm"
+                className="rounded-2xl border border-[#30363d] bg-[#0d1117] p-3 text-left text-sm text-[#e6edf3] transition hover:border-[#2563eb]/40"
               >
-                <span className="truncate">"{query}"</span>
+                {query}
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto space-y-4 mb-6 pr-2">
-        {messages.map(message => (
-          <div
-            key={message.id}
-            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
-          >
-            <div
-              className={`max-w-md px-4 py-3 rounded-lg ${
-                message.sender === 'user'
-                  ? 'bg-gradient-to-br from-primary-500 to-accent-600 text-white shadow-md shadow-primary-300'
-                  : 'bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 text-slate-900 shadow-sm'
-              }`}
-            >
-              <p className="text-sm leading-relaxed">{message.text}</p>
-              <p className={`text-xs mt-2 ${
-                message.sender === 'user' ? 'text-primary-100 opacity-75' : 'text-slate-500'
-              }`}>
-                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </p>
-            </div>
-          </div>
-        ))}
-        {loading && (
-          <div className="flex justify-start animate-fade-in">
-            <div className="bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 text-slate-900 px-4 py-3 rounded-lg flex items-center gap-2 shadow-sm">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+      <div className="panel flex-1 overflow-y-auto p-4">
+        <div className="space-y-3">
+          {messages.map((message) => (
+            <div key={message.id} className={`flex animate-fade-in ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${message.sender === 'user' ? 'bg-[#2563eb] text-white' : 'border border-[#30363d] bg-[#0d1117] text-[#e6edf3]'}`}>
+                <p className="text-sm leading-6">{message.text}</p>
+                <p className={`mt-2 text-[11px] ${message.sender === 'user' ? 'text-blue-100/80' : 'text-[#8b949e]'}`}>
+                  {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
               </div>
-              <p className="text-sm">💭 SupplySense is thinking...</p>
             </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
+          ))}
+          {loading && (
+            <div className="flex justify-start animate-fade-in">
+              <div className="rounded-2xl border border-[#30363d] bg-[#0d1117] px-4 py-3 text-sm text-[#8b949e]">
+                <div className="flex items-center gap-2">
+                  <LoaderCircle className="h-4 w-4 animate-spin text-[#60a5fa]" />
+                  SupplySense is thinking...
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
-      {/* Input Form */}
-      <form onSubmit={handleSendMessage} className="flex gap-3">
+      <form onSubmit={handleSendMessage} className="panel flex items-center gap-3 p-3">
         <input
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          placeholder="💬 Ask about inventory, suppliers, forecasts..."
+          placeholder="Ask about inventory, suppliers, forecasts..."
           disabled={loading}
           className="input-modern flex-1"
         />
-        <button
-          type="submit"
-          disabled={loading || !inputValue.trim()}
-          className="btn-primary flex-shrink-0"
-        >
-          <Send className="w-4 h-4" />
+        <button type="submit" disabled={loading || !inputValue.trim()} className="btn-primary">
+          <Send className="h-4 w-4" />
           <span className="hidden sm:inline">Send</span>
         </button>
       </form>

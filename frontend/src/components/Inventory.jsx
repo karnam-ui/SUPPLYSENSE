@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import useAPI from '../hooks/useAPI';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Search, Package } from 'lucide-react';
+import { Search, Package, AlertTriangle, CheckCircle2, AlertCircle } from 'lucide-react';
 
 const Inventory = () => {
   const { data: inventoryData } = useAPI('/inventory');
@@ -9,136 +9,127 @@ const Inventory = () => {
 
   const filteredProducts = useMemo(() => {
     if (!Array.isArray(inventoryData)) return [];
-    return inventoryData.filter(item =>
-      (item.product?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    return inventoryData.filter((item) => (item.product?.name || '').toLowerCase().includes(searchTerm.toLowerCase()));
   }, [inventoryData, searchTerm]);
 
   const chartData = useMemo(() => {
     if (!Array.isArray(inventoryData)) return [];
-    return inventoryData.slice(0, 8).map(p => ({
-      name: (p.product?.name || 'Unknown').substring(0, 12),
-      current: p.quantity,
-      reorder: p.reorder_point,
+    return inventoryData.slice(0, 8).map((product) => ({
+      name: (product.product?.name || 'Unknown').substring(0, 12),
+      current: product.quantity,
+      reorder: product.reorder_point,
     }));
   }, [inventoryData]);
 
   const getStockStatus = (current, reorder) => {
-    if (current <= reorder) return { color: 'danger', status: 'Critical', emoji: '❌' };
-    if (current <= reorder * 1.5) return { color: 'warning', status: 'Low', emoji: '⚠️' };
-    return { color: 'success', status: 'OK', emoji: '✅' };
+    if (current <= reorder) return { tone: 'critical', label: 'CRITICAL', icon: AlertTriangle };
+    if (current <= reorder * 1.5) return { tone: 'warning', label: 'LOW', icon: AlertCircle };
+    return { tone: 'success', label: 'HEALTHY', icon: CheckCircle2 };
   };
 
   return (
     <div className="space-y-6">
-      {/* Search Bar */}
-      <div className="card-modern">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center text-lg">
-            🔍
+      <div className="panel p-5">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#2563eb]/15 text-[#60a5fa]">
+            <Search className="h-5 w-5" />
           </div>
-          <h2 className="gradient-text-primary text-xl font-bold">Search Inventory</h2>
+          <div>
+            <h3 className="text-lg font-semibold text-[#f8fbff]">Inventory search</h3>
+            <p className="text-sm text-[#8b949e]">Find products needing replenishment</p>
+          </div>
         </div>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8b949e]" />
           <input
             type="text"
-            placeholder="Search by product name or SKU..."
+            placeholder="Search by product name"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="input-modern pl-10 w-full"
+            className="input-modern pl-10"
           />
         </div>
       </div>
 
-      {/* Chart */}
       {chartData.length > 0 && (
-        <div className="card-modern">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-lg bg-success-100 flex items-center justify-center text-lg">
-              📊
+        <div className="panel p-5">
+          <div className="mb-5 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#22c55e]/15 text-[#86efac]">
+              <Package className="h-5 w-5" />
             </div>
-            <h2 className="gradient-text-primary text-xl font-bold">Stock Levels Overview</h2>
+            <div>
+              <h3 className="text-lg font-semibold text-[#f8fbff]">Stock levels</h3>
+              <p className="text-sm text-[#8b949e]">Current quantity against reorder thresholds</p>
+            </div>
           </div>
-
-          <div className="overflow-x-auto">
-            <ResponsiveContainer width="100%" height={300}>
+          <div className="h-[280px]">
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="name" stroke="#64748b" />
-                <YAxis stroke="#64748b" />
-                <Tooltip
-                  contentStyle={{ 
-                    backgroundColor: '#ffffff', 
-                    border: '1px solid #e2e8f0', 
-                    borderRadius: '0.75rem',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
-                  }}
-                  labelStyle={{ color: '#1e293b' }}
-                />
+                <CartesianGrid stroke="#21262d" strokeDasharray="3 3" />
+                <XAxis dataKey="name" stroke="#8b949e" tickLine={false} axisLine={false} />
+                <YAxis stroke="#8b949e" tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ backgroundColor: '#0d1117', border: '1px solid #30363d', borderRadius: '0.9rem' }} labelStyle={{ color: '#e6edf3' }} />
                 <Legend />
-                <Bar dataKey="current" fill="#0284c7" radius={[8, 8, 0, 0]} />
-                <Bar dataKey="reorder" fill="#f59e0b" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="current" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="reorder" fill="#f97316" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
       )}
 
-      {/* Inventory Table */}
-      <div className="card-modern overflow-hidden">
-        <div className="flex items-center gap-3 mb-6 px-6 pt-6">
-          <div className="w-10 h-10 rounded-lg bg-warning-100 flex items-center justify-center text-lg">
-            📦
+      <div className="panel overflow-hidden">
+        <div className="border-b border-[#30363d] p-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f59e0b]/15 text-[#fcd34d]">
+              <Package className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-[#f8fbff]">Inventory list</h3>
+              <p className="text-sm text-[#8b949e]">Warehouse and replenishment posture</p>
+            </div>
           </div>
-          <h2 className="gradient-text-primary text-xl font-bold">Inventory List</h2>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="px-6 py-4 text-left text-slate-700 font-semibold text-sm">🏭 Warehouse</th>
-                <th className="px-6 py-4 text-left text-slate-700 font-semibold text-sm">📦 Product</th>
-                <th className="px-6 py-4 text-center text-slate-700 font-semibold text-sm">Current Stock</th>
-                <th className="px-6 py-4 text-center text-slate-700 font-semibold text-sm">Reorder Point</th>
-                <th className="px-6 py-4 text-center text-slate-700 font-semibold text-sm">Status</th>
-                <th className="hidden sm:table-cell px-6 py-4 text-center text-slate-700 font-semibold text-sm">Updated</th>
+          <table className="min-w-full">
+            <thead className="bg-[#0d1117]">
+              <tr>
+                <th className="px-5 py-3 text-left text-sm font-semibold text-[#8b949e]">Warehouse</th>
+                <th className="px-5 py-3 text-left text-sm font-semibold text-[#8b949e]">Product</th>
+                <th className="px-5 py-3 text-center text-sm font-semibold text-[#8b949e]">Stock</th>
+                <th className="px-5 py-3 text-center text-sm font-semibold text-[#8b949e]">Reorder</th>
+                <th className="px-5 py-3 text-center text-sm font-semibold text-[#8b949e]">Status</th>
+                <th className="hidden px-5 py-3 text-center text-sm font-semibold text-[#8b949e] sm:table-cell">Updated</th>
               </tr>
             </thead>
             <tbody>
               {filteredProducts.length > 0 ? (
                 filteredProducts.map((product, idx) => {
                   const status = getStockStatus(product.quantity, product.reorder_point);
+                  const Icon = status.icon;
+                  const toneClass = status.tone === 'success' ? 'status-chip-success' : status.tone === 'warning' ? 'status-chip-warning' : 'status-chip-critical';
                   return (
-                    <tr key={idx} className="border-b border-slate-200 hover:bg-slate-50 transition-colors duration-150">
-                      <td className="px-6 py-4 text-slate-700 text-sm font-medium">{product.warehouse_name}</td>
-                      <td className="px-6 py-4 text-slate-900 text-sm font-medium">{product.product?.name || 'Unknown'}</td>
-                      <td className="px-6 py-4 text-center text-slate-900 font-semibold text-sm">{product.quantity}</td>
-                      <td className="px-6 py-4 text-center text-slate-600 text-sm">{product.reorder_point}</td>
-                      <td className="px-6 py-4 text-center">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold ${
-                          status.color === 'success' 
-                            ? 'bg-success-100 text-success-700' 
-                            : status.color === 'warning'
-                            ? 'bg-warning-100 text-warning-700'
-                            : 'bg-danger-100 text-danger-700'
-                        }`}>
-                          <span className="text-lg">{status.emoji}</span>
-                          {status.status}
+                    <tr key={idx} className="border-t border-[#30363d] bg-[#161b22]/60 transition hover:bg-[#161b22]">
+                      <td className="px-5 py-4 text-sm text-[#f8fbff]">{product.warehouse_name}</td>
+                      <td className="px-5 py-4 text-sm text-[#e6edf3]">{product.product?.name || 'Unknown'}</td>
+                      <td className="px-5 py-4 text-center text-sm font-semibold text-[#f8fbff]">{product.quantity}</td>
+                      <td className="px-5 py-4 text-center text-sm text-[#8b949e]">{product.reorder_point}</td>
+                      <td className="px-5 py-4 text-center">
+                        <span className={`status-chip ${toneClass}`}>
+                          <Icon className="h-3.5 w-3.5" />
+                          {status.label}
                         </span>
                       </td>
-                      <td className="hidden sm:table-cell px-6 py-4 text-center text-slate-600 text-sm">
-                        {new Date(product.last_updated).toLocaleString()}
-                      </td>
+                      <td className="hidden px-5 py-4 text-center text-sm text-[#8b949e] sm:table-cell">{new Date(product.last_updated).toLocaleString()}</td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center">
-                    <Package className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-                    <p className="text-slate-500 font-medium">{searchTerm ? 'No products found' : 'No inventory data'}</p>
+                  <td colSpan="6" className="px-5 py-12 text-center text-[#8b949e]">
+                    <Package className="mx-auto mb-3 h-10 w-10" />
+                    {searchTerm ? 'No products match that search.' : 'No inventory data yet.'}
                   </td>
                 </tr>
               )}

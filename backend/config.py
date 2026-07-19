@@ -1,11 +1,15 @@
 """Configuration file for SupplySense backend."""
 import os
+from pathlib import Path
 from typing import Optional
+
+BASE_DIR = Path(__file__).resolve().parent
+DEFAULT_SQLITE_DB = BASE_DIR / "suppliesense.db"
 
 # Database configuration
 DATABASE_URL: str = os.getenv(
     "DATABASE_URL",
-    "postgresql://sainishanth@localhost/supplysense"
+    f"sqlite:///{DEFAULT_SQLITE_DB}"
 )
 
 # Redis configuration
